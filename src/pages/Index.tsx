@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -9,14 +8,14 @@ const Index = () => {
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className="h-6 w-6 text-primary"
             >
               <path d="M21 8V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-1" />
@@ -52,6 +51,26 @@ const Index = () => {
             <Button size="lg" className="px-8">Try for Free</Button>
           </Link>
           <Button size="lg" variant="outline">See How It Works</Button>
+        </div>
+
+        {/* Rating badge - new addition */}
+        <div className="flex items-center gap-2 bg-accent/50 px-4 py-2 rounded-full animate-in fade-in" style={{ animationDelay: "0.3s" }}>
+          <div className="flex">
+            {[1, 2, 3, 4, 5].map((star, index) => (
+              <svg
+                key={index}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill={index < 4.5 ? "currentColor" : "none"}
+                stroke="currentColor"
+                className={`w-4 h-4 ${index < 4.5 ? "text-yellow-500" : "text-gray-300"}`}
+              >
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            ))}
+          </div>
+          <span className="font-medium">4.8/5</span>
+          <span className="text-muted-foreground text-sm">from 2,000+ reviews</span>
         </div>
       </section>
 
@@ -183,14 +202,14 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between gap-8">
             <div className="space-y-4 max-w-xs">
               <div className="flex items-center gap-2">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   className="h-6 w-6 text-primary"
                 >
                   <path d="M21 8V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-1" />

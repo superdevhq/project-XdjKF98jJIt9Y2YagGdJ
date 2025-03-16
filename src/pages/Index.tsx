@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -338,7 +337,7 @@ const Index = () => {
 
       {/* CTA Section */}
       <section className="container py-24 md:py-32">
-        <div className="rounded-2xl bg-primary text-primary-foreground p-8 md:p-12 shadow-lg">
+        <div className="rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-primary-foreground p-8 md:p-12 shadow-lg">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="space-y-4 max-w-2xl">
               <h2 className="text-3xl md:text-4xl font-bold">Ready to transform your email marketing?</h2>
@@ -347,7 +346,7 @@ const Index = () => {
               </p>
             </div>
             <Link to="/login">
-              <Button size="lg" variant="secondary" className="px-8 whitespace-nowrap">
+              <Button size="lg" variant="secondary" className="px-8 whitespace-nowrap hover:bg-white/90 hover:text-indigo-700 transition-colors">
                 Get Started Free
               </Button>
             </Link>

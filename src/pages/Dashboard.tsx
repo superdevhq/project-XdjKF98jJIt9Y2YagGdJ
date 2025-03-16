@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/integrations/supabase/client";
-import { analyzeLandingPage, saveEmailTemplate, logAnalyticsEvent } from "@/services/landingPageService";
+import { saveEmailTemplate, logAnalyticsEvent } from "@/services/landingPageService";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,8 +45,47 @@ const Dashboard = () => {
   const { profile } = useProfile();
   const [url, setUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [emailCopy, setEmailCopy] = useState<EmailCopy | null>(null);
+  const [emailCopy, setEmailCopy] = useState<EmailCopy>({
+    subject: "",
+    preheader: "",
+    body: ""
+  });
   const [activeTab, setActiveTab] = useState("generate");
+  const [landingPageData, setLandingPageData] = useState<LandingPageData | null>(null);
+
+  // Check for selected landing page from history
+  useEffect(() => {
+    const storedLandingPage = localStorage.getItem('selectedLandingPage');
+    if (storedLandingPage) {
+      try {
+        const parsedData = JSON.parse(storedLandingPage);
+        setLandingPageData(parsedData);
+        setUrl(parsedData.url);
+        
+        // Generate email copy if available in analyzed_data
+        if (parsedData.analyzed_data?.email_copy) {
+          const { email_copy } = parsedData.analyzed_data;
+          setEmailCopy({
+            subject: email_copy.subject_line || "",
+            preheader: email_copy.subject_line || "", // Use subject line as preheader if not provided
+            body: email_copy.email_body || "",
+          });
+        } else {
+          // Fallback to old method if no email_copy in analyzed_data
+          setEmailCopy(generateEmailCopy(parsedData));
+        }
+        
+        // Clear the stored landing page
+        localStorage.removeItem('selectedLandingPage');
+        
+        // Log analytics event
+        logAnalyticsEvent('loaded_from_history', { url: parsedData.url })
+          .catch(err => console.error("Analytics error:", err));
+      } catch (error) {
+        console.error("Error parsing stored landing page:", error);
+      }
+    }
+  }, []);
 
   const handleUrlSubmit = async (submittedUrl: string) => {
     if (!user) return;
@@ -55,12 +94,29 @@ const Dashboard = () => {
     setIsAnalyzing(true);
     
     try {
-      // Use our service to analyze the landing page
-      const landingPageData = await analyzeLandingPage(submittedUrl);
+      // Call the edge function to analyze the landing page
+      const { data, error } = await supabase.functions.invoke("analyze-landing-page", {
+        body: { url: submittedUrl },
+      });
       
-      // Generate email copy based on the landing page data
-      const generatedCopy = generateEmailCopy(landingPageData);
-      setEmailCopy(generatedCopy);
+      if (error) throw error;
+      
+      if (data.data) {
+        setLandingPageData(data.data);
+        
+        // Generate email copy if available in analyzed_data
+        if (data.data.analyzed_data?.email_copy) {
+          const { email_copy } = data.data.analyzed_data;
+          setEmailCopy({
+            subject: email_copy.subject_line || "",
+            preheader: email_copy.subject_line || "", // Use subject line as preheader if not provided
+            body: email_copy.email_body || "",
+          });
+        } else {
+          // Fallback to old method if no email_copy in analyzed_data
+          setEmailCopy(generateEmailCopy(data.data));
+        }
+      }
       
       // Log analytics event
       await logAnalyticsEvent('generated_email', { url: submittedUrl });
@@ -77,7 +133,7 @@ const Dashboard = () => {
   };
 
   const handleSaveTemplate = async () => {
-    if (!user || !emailCopy) return;
+    if (!user || !emailCopy.subject) return;
     
     try {
       await saveEmailTemplate({
@@ -121,32 +177,22 @@ const Dashboard = () => {
     }
   };
 
-  // Function to generate email copy based on landing page data
+  // Function to generate email copy based on landing page data (fallback method)
   const generateEmailCopy = (landingPageData: LandingPageData): EmailCopy => {
     const analyzedData = landingPageData.analyzed_data;
     
-    // In a real app, this would use AI to generate copy based on the landing page data
-    // For now, we'll use a simple template
+    if (!analyzedData) {
+      return {
+        subject: `Check out: ${landingPageData.title || "our latest offering"}`,
+        preheader: landingPageData.description || "We have something special for you",
+        body: `Hi there,\n\nWe wanted to share some information about ${landingPageData.title || "our product"}.\n\n${landingPageData.description || ""}\n\nKey points:\n${landingPageData.keywords?.map(point => `• ${point}`).join('\n') || "• Our solution is designed to meet your needs"}\n\nClick below to learn more.\n\n[Learn More]\n\nBest regards,\nThe Team`
+      };
+    }
     
     return {
-      subject: `Discover: ${analyzedData.main_heading}`,
-      preheader: analyzedData.sub_heading || analyzedData.description,
-      body: `Hi there,
-
-We noticed you're interested in ${analyzedData.industry} solutions, and we wanted to share how our product can help you ${analyzedData.sub_heading.toLowerCase()}.
-
-${analyzedData.main_heading} is now possible with our innovative solution. Here's what you can expect:
-
-${analyzedData.key_points.map((point: string) => `• ${point}`).join('\n')}
-
-Ready to transform your business? Click below to get started.
-
-[${analyzedData.cta_text}]
-
-If you have any questions, feel free to reply to this email.
-
-Best regards,
-The Team`
+      subject: `Discover: ${analyzedData.main_heading || landingPageData.title}`,
+      preheader: analyzedData.sub_heading || analyzedData.description || landingPageData.description,
+      body: `Hi there,\n\nWe noticed you're interested in ${analyzedData.industry || "innovative"} solutions, and we wanted to share how our product can help you ${(analyzedData.sub_heading || "achieve your goals").toLowerCase()}.\n\n${analyzedData.main_heading || landingPageData.title} is now possible with our innovative solution. Here's what you can expect:\n\n${(analyzedData.key_points || landingPageData.keywords || ["Our solution is designed to meet your needs"]).map((point: string) => `• ${point}`).join('\n')}\n\nReady to transform your business? Click below to get started.\n\n[${analyzedData.cta_text || "Get Started"}]\n\nIf you have any questions, feel free to reply to this email.\n\nBest regards,\nThe Team`
     };
   };
 
@@ -174,20 +220,23 @@ The Team`
           </Link>
           
           <div className="flex items-center gap-4">
+            <Link to="/landing-pages">
+              <Button variant="ghost" size="sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <rect width="18" height="18" x="3" y="3" rx="2" />
+                  <path d="M7 7h10" />
+                  <path d="M7 12h10" />
+                  <path d="M7 17h10" />
+                </svg>
+                Landing Pages
+              </Button>
+            </Link>
             <Button variant="ghost" size="sm">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                 <path d="M12 20h9" />
                 <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
               </svg>
               Feedback
-            </Button>
-            <Button variant="ghost" size="sm">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-              Help
             </Button>
             
             <DropdownMenu>
@@ -211,15 +260,14 @@ The Team`
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/dashboard">
+                  <Link to="/landing-pages">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                       <rect width="18" height="18" x="3" y="3" rx="2" />
-                      <path d="M9 3v18" />
-                      <path d="M13 7h5" />
-                      <path d="M13 11h5" />
-                      <path d="M13 15h5" />
+                      <path d="M7 7h10" />
+                      <path d="M7 12h10" />
+                      <path d="M7 17h10" />
                     </svg>
-                    Dashboard
+                    Landing Pages
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -276,15 +324,68 @@ The Team`
                 </div>
               )}
 
-              {emailCopy && !isAnalyzing && (
+              {emailCopy.subject && !isAnalyzing && (
                 <div className="grid md:grid-cols-2 gap-6">
                   <EmailGenerator 
                     emailCopy={emailCopy} 
                     setEmailCopy={setEmailCopy} 
-                    onSave={handleSaveTemplate} 
+                    onSave={handleSaveTemplate}
+                    landingPageData={landingPageData}
+                    url={url}
                   />
                   <EmailPreview emailCopy={emailCopy} />
                 </div>
+              )}
+              
+              {landingPageData && !isAnalyzing && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle>Landing Page Analysis</CardTitle>
+                    <CardDescription>
+                      Key information extracted from {url}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-medium">Title</h3>
+                        <p>{landingPageData.title || "Not detected"}</p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium">Description</h3>
+                        <p>{landingPageData.description || "Not detected"}</p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium">Key Points</h3>
+                        {landingPageData.keywords && landingPageData.keywords.length > 0 ? (
+                          <ul className="list-disc list-inside space-y-1">
+                            {landingPageData.keywords.map((keyword, index) => (
+                              <li key={index}>{keyword}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p>No key points detected</p>
+                        )}
+                      </div>
+                      
+                      {landingPageData.analyzed_data?.tone && (
+                        <div>
+                          <h3 className="text-sm font-medium">Tone</h3>
+                          <p className="capitalize">{landingPageData.analyzed_data.tone}</p>
+                        </div>
+                      )}
+                      
+                      {landingPageData.analyzed_data?.industry && (
+                        <div>
+                          <h3 className="text-sm font-medium">Industry</h3>
+                          <p className="capitalize">{landingPageData.analyzed_data.industry}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
             </TabsContent>
             

@@ -26,17 +26,32 @@ export const UrlInput = ({ onSubmit, isLoading }: UrlInputProps) => {
     }
     
     try {
+      // Add protocol if missing
+      let processedUrl = url;
+      if (!/^https?:\/\//i.test(url)) {
+        processedUrl = "https://" + url;
+      }
+      
       // Check if URL is valid
-      new URL(url);
-      onSubmit(url);
+      new URL(processedUrl);
+      onSubmit(processedUrl);
     } catch (error) {
       toast({
         title: "Invalid URL",
-        description: "Please enter a valid URL including http:// or https://",
+        description: "Please enter a valid URL",
         variant: "destructive",
       });
     }
   };
+
+  // Real-world example URLs that work well with Tavily API
+  const exampleUrls = [
+    "https://www.apple.com/iphone-15-pro/",
+    "https://www.hubspot.com/products/marketing",
+    "https://www.salesforce.com/products/sales-cloud/overview/",
+    "https://www.shopify.com/plus",
+    "https://slack.com/features"
+  ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -64,29 +79,24 @@ export const UrlInput = ({ onSubmit, isLoading }: UrlInputProps) => {
         </Button>
       </div>
       <div className="text-sm text-muted-foreground">
-        <p>Example URLs to try:</p>
-        <ul className="list-disc list-inside space-y-1 mt-1">
-          <li>
+        <p>Try these real landing pages:</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+          {exampleUrls.map((exampleUrl, index) => (
             <button 
+              key={index}
               type="button" 
-              className="text-primary hover:underline"
-              onClick={() => setUrl("https://www.example.com/product-landing")}
+              className="text-primary hover:underline text-left truncate"
+              onClick={() => setUrl(exampleUrl)}
               disabled={isLoading}
             >
-              https://www.example.com/product-landing
+              {exampleUrl}
             </button>
-          </li>
-          <li>
-            <button 
-              type="button" 
-              className="text-primary hover:underline"
-              onClick={() => setUrl("https://www.example.com/webinar-signup")}
-              disabled={isLoading}
-            >
-              https://www.example.com/webinar-signup
-            </button>
-          </li>
-        </ul>
+          ))}
+        </div>
+        <p className="mt-3 text-xs">
+          <span className="font-medium">Note:</span> Our AI analyzes public landing pages to generate relevant email copy. 
+          For best results, use pages with clear value propositions and calls to action.
+        </p>
       </div>
     </form>
   );

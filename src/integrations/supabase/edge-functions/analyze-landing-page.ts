@@ -28,6 +28,136 @@ export const corsHandler = (req: Request) => {
   }
 }
 
+// Function to extract data from a URL using Tavily API
+async function extractDataWithTavily(url: string) {
+  const tavilyApiKey = Deno.env.get('TAVILY_API_KEY');
+  
+  if (!tavilyApiKey) {
+    throw new Error('Tavily API key is not configured');
+  }
+
+  const response = await fetch('https://api.tavily.com/search', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${tavilyApiKey}`
+    },
+    body: JSON.stringify({
+      query: `Extract key information from this website: ${url}`,
+      search_depth: "advanced",
+      include_domains: [new URL(url).hostname],
+      max_results: 5
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Tavily API error: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+// Function to generate email copy using OpenAI
+async function generateEmailCopy(websiteData: any) {
+  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+  
+  if (!openaiApiKey) {
+    throw new Error('OpenAI API key is not configured');
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${openaiApiKey}`
+    },
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert email copywriter. Create a compelling email based on the landing page data provided."
+        },
+        {
+          role: "user",
+          content: `Create a marketing email based on this landing page data: ${JSON.stringify(websiteData)}. 
+          The email should include:
+          1. A catchy subject line
+          2. A compelling introduction
+          3. 3-5 key points highlighting the benefits
+          4. A strong call to action
+          Format the response as JSON with the following fields: subject_line, email_body, cta_text`
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  return JSON.parse(data.choices[0].message.content);
+}
+
+// Function to analyze website content and extract structured data
+async function analyzeWebsiteContent(tavilyData: any, url: string) {
+  // Extract content from Tavily search results
+  const content = tavilyData.results.map(result => result.content).join('\n\n');
+  
+  // Use OpenAI to structure the data
+  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+  
+  if (!openaiApiKey) {
+    throw new Error('OpenAI API key is not configured');
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${openaiApiKey}`
+    },
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert at analyzing landing pages and extracting key information."
+        },
+        {
+          role: "user",
+          content: `Analyze this landing page content from ${url} and extract the following information in JSON format:
+          {
+            "title": "The page title",
+            "description": "Meta description or main page description",
+            "main_heading": "The main heading of the page",
+            "sub_heading": "Any subheading text",
+            "cta_text": "Call to action button text",
+            "key_points": ["List of key points or benefits mentioned"],
+            "tone": "The overall tone (professional, casual, urgent, etc.)",
+            "industry": "The industry this page appears to be targeting"
+          }
+          
+          Here's the content to analyze:
+          ${content}`
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  return JSON.parse(data.choices[0].message.content);
+}
+
 // Main function
 Deno.serve(async (req) => {
   // Handle CORS
@@ -115,7 +245,7 @@ Deno.serve(async (req) => {
         user_id: user.id,
         event_type: 'reused_landing_page',
         event_data: { url }
-      })
+      }).catch(err => console.error('Analytics error:', err))
 
       return new Response(
         JSON.stringify({ 
@@ -129,58 +259,20 @@ Deno.serve(async (req) => {
       )
     }
 
-    // In a real implementation, we would fetch and analyze the landing page here
-    // For this demo, we'll simulate the analysis with mock data
+    // Extract data using Tavily API
+    const tavilyData = await extractDataWithTavily(url);
+    
+    // Analyze the website content using the extracted data
+    const analyzedData = await analyzeWebsiteContent(tavilyData, url);
+    
+    // Generate email copy based on the analyzed data
+    const emailCopy = await generateEmailCopy(analyzedData);
 
-    // Determine the type of landing page based on the URL
-    let mockAnalyzedData: WebsiteData
-
-    if (url.includes('webinar')) {
-      mockAnalyzedData = {
-        title: "Webinar Landing Page",
-        description: "Sign up for our exclusive webinar on digital marketing strategies.",
-        main_heading: "Join Our Exclusive Webinar",
-        sub_heading: "Learn cutting-edge marketing techniques from industry experts",
-        cta_text: "Reserve Your Spot",
-        key_points: [
-          "Live Q&A with marketing experts",
-          "Actionable strategies you can implement immediately",
-          "Free resources and templates"
-        ],
-        tone: "educational",
-        industry: "marketing"
-      }
-    } else if (url.includes('product')) {
-      mockAnalyzedData = {
-        title: "Product Landing Page",
-        description: "Discover our innovative product that solves your biggest challenges.",
-        main_heading: "Introducing Our Revolutionary Product",
-        sub_heading: "The solution you've been waiting for",
-        cta_text: "Buy Now",
-        key_points: [
-          "40% more efficient than competitors",
-          "Easy integration with your existing tools",
-          "24/7 customer support"
-        ],
-        tone: "professional",
-        industry: "technology"
-      }
-    } else {
-      mockAnalyzedData = {
-        title: "Generic Landing Page",
-        description: "This is a generic landing page description.",
-        main_heading: "Transform Your Business Today",
-        sub_heading: "Increase efficiency and reduce costs",
-        cta_text: "Get Started",
-        key_points: [
-          "Feature 1: Boost productivity",
-          "Feature 2: Streamline workflows",
-          "Feature 3: Enhance collaboration"
-        ],
-        tone: "professional",
-        industry: "business"
-      }
-    }
+    // Combine the data
+    const combinedData = {
+      ...analyzedData,
+      email_copy: emailCopy
+    };
 
     // Store the analyzed data in Supabase
     const { data: newLandingPage, error: insertError } = await supabaseClient
@@ -188,10 +280,10 @@ Deno.serve(async (req) => {
       .insert({
         user_id: user.id,
         url: url,
-        title: mockAnalyzedData.title,
-        description: mockAnalyzedData.description,
-        keywords: mockAnalyzedData.key_points,
-        analyzed_data: mockAnalyzedData
+        title: analyzedData.title,
+        description: analyzedData.description,
+        keywords: analyzedData.key_points,
+        analyzed_data: combinedData
       })
       .select()
       .single()
@@ -203,7 +295,7 @@ Deno.serve(async (req) => {
       user_id: user.id,
       event_type: 'new_landing_page_analysis',
       event_data: { url }
-    })
+    }).catch(err => console.error('Analytics error:', err))
 
     return new Response(
       JSON.stringify({ 

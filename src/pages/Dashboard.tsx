@@ -337,4 +337,70 @@ const Dashboard = () => {
                 </div>
               )}
               
-              {lan
+              {landingPageData && !isAnalyzing && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle>Landing Page Analysis</CardTitle>
+                    <CardDescription>
+                      Key information extracted from {url}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-medium">Title</h3>
+                        <p>{landingPageData.title || "Not detected"}</p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium">Description</h3>
+                        <p>{landingPageData.description || "Not detected"}</p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium">Key Points</h3>
+                        {landingPageData.keywords && landingPageData.keywords.length > 0 ? (
+                          <ul className="list-disc list-inside space-y-1">
+                            {landingPageData.keywords.map((keyword, index) => (
+                              <li key={index}>{keyword}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p>No key points detected</p>
+                        )}
+                      </div>
+                      
+                      {landingPageData.analyzed_data?.tone && (
+                        <div>
+                          <h3 className="text-sm font-medium">Tone</h3>
+                          <p className="capitalize">{landingPageData.analyzed_data.tone}</p>
+                        </div>
+                      )}
+                      
+                      {landingPageData.analyzed_data?.industry && (
+                        <div>
+                          <h3 className="text-sm font-medium">Industry</h3>
+                          <p className="capitalize">{landingPageData.analyzed_data.industry}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="templates">
+              <SavedTemplates />
+            </TabsContent>
+            
+            <TabsContent value="analytics">
+              <AnalyticsDashboard />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;

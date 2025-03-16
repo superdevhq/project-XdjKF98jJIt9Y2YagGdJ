@@ -59,6 +59,31 @@ async function extractDataWithTavily(url: string) {
   return data;
 }
 
+// Helper function to safely parse JSON from OpenAI responses
+function safeJsonParse(text) {
+  // Remove any markdown code block indicators
+  let cleanedText = text.replace(/```(json)?|```/g, '').trim();
+  
+  try {
+    return JSON.parse(cleanedText);
+  } catch (e) {
+    console.error("JSON parse error:", e);
+    console.error("Attempted to parse:", cleanedText);
+    
+    // Fallback with a basic structure if parsing fails
+    return {
+      title: "Parsing Error",
+      description: "Could not parse the landing page content",
+      main_heading: "Unknown",
+      sub_heading: "Unknown",
+      cta_text: "Learn More",
+      key_points: ["Feature 1", "Feature 2", "Feature 3"],
+      tone: "professional",
+      industry: "technology"
+    };
+  }
+}
+
 // Function to generate email copy using OpenAI
 async function generateEmailCopy(websiteData: any) {
   const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -78,7 +103,7 @@ async function generateEmailCopy(websiteData: any) {
       messages: [
         {
           role: "system",
-          content: "You are an expert email copywriter. Create a compelling email based on the landing page data provided."
+          content: "You are an expert email copywriter. Create a compelling email based on the landing page data provided. Return ONLY valid JSON without any markdown formatting."
         },
         {
           role: "user",
@@ -88,7 +113,8 @@ async function generateEmailCopy(websiteData: any) {
           2. A compelling introduction
           3. 3-5 key points highlighting the benefits
           4. A strong call to action
-          Format the response as JSON with the following fields: subject_line, email_body, cta_text`
+          Format the response as JSON with the following fields: subject_line, email_body, cta_text. 
+          IMPORTANT: Return ONLY the JSON object without any markdown formatting or code blocks.`
         }
       ]
     })
@@ -100,7 +126,7 @@ async function generateEmailCopy(websiteData: any) {
   }
 
   const data = await response.json();
-  return JSON.parse(data.choices[0].message.content);
+  return safeJsonParse(data.choices[0].message.content);
 }
 
 // Function to analyze website content and extract structured data
@@ -126,7 +152,7 @@ async function analyzeWebsiteContent(tavilyData: any, url: string) {
       messages: [
         {
           role: "system",
-          content: "You are an expert at analyzing landing pages and extracting key information."
+          content: "You are an expert at analyzing landing pages and extracting key information. Return ONLY valid JSON without any markdown formatting."
         },
         {
           role: "user",
@@ -143,7 +169,9 @@ async function analyzeWebsiteContent(tavilyData: any, url: string) {
           }
           
           Here's the content to analyze:
-          ${content}`
+          ${content}
+          
+          IMPORTANT: Return ONLY the JSON object without any markdown formatting or code blocks.`
         }
       ]
     })
@@ -155,7 +183,7 @@ async function analyzeWebsiteContent(tavilyData: any, url: string) {
   }
 
   const data = await response.json();
-  return JSON.parse(data.choices[0].message.content);
+  return safeJsonParse(data.choices[0].message.content);
 }
 
 // Function to log analytics safely

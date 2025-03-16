@@ -158,6 +158,20 @@ async function analyzeWebsiteContent(tavilyData: any, url: string) {
   return JSON.parse(data.choices[0].message.content);
 }
 
+// Function to log analytics safely
+async function logAnalytics(supabaseClient, userId, eventType, eventData) {
+  try {
+    await supabaseClient.from('analytics').insert({
+      user_id: userId,
+      event_type: eventType,
+      event_data: eventData
+    });
+  } catch (err) {
+    console.error('Analytics error:', err);
+    // Continue execution even if analytics logging fails
+  }
+}
+
 // Main function
 Deno.serve(async (req) => {
   // Handle CORS
@@ -241,11 +255,7 @@ Deno.serve(async (req) => {
 
     if (existingData) {
       // Log analytics event for reusing existing data
-      await supabaseClient.from('analytics').insert({
-        user_id: user.id,
-        event_type: 'reused_landing_page',
-        event_data: { url }
-      }).catch(err => console.error('Analytics error:', err))
+      await logAnalytics(supabaseClient, user.id, 'reused_landing_page', { url });
 
       return new Response(
         JSON.stringify({ 
@@ -291,11 +301,7 @@ Deno.serve(async (req) => {
     if (insertError) throw insertError
 
     // Log analytics event
-    await supabaseClient.from('analytics').insert({
-      user_id: user.id,
-      event_type: 'new_landing_page_analysis',
-      event_data: { url }
-    }).catch(err => console.error('Analytics error:', err))
+    await logAnalytics(supabaseClient, user.id, 'new_landing_page_analysis', { url });
 
     return new Response(
       JSON.stringify({ 

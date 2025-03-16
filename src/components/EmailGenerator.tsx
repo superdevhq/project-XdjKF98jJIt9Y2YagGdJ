@@ -167,36 +167,19 @@ export const EmailGenerator = ({
   };
 
   return (
-    <Card className="h-full border-2 border-primary/10 shadow-md">
-      <CardHeader className="bg-muted/50">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            className="h-5 w-5 text-primary"
-          >
-            <path d="M21 8V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-1" />
-            <path d="M3 8h18" />
-            <path d="M9 12h6" />
-            <path d="M9 16h6" />
-          </svg>
-          Email Copy Generator
-        </CardTitle>
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle>Email Copy Generator</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6 pt-6">
+      <CardContent className="space-y-6">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="subject" className="text-sm font-medium">Subject Line</Label>
+            <Label htmlFor="subject">Subject Line</Label>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={() => handleRegenerateSection('subject')}
-              className="h-6 text-xs hover:bg-primary/10 hover:text-primary"
+              className="h-6 text-xs"
               disabled={isRegenerating}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
@@ -212,18 +195,17 @@ export const EmailGenerator = ({
             id="subject"
             value={emailCopy.subject}
             onChange={(e) => handleChange('subject', e.target.value)}
-            className="border-primary/20 focus-visible:ring-primary/30"
           />
         </div>
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="preheader" className="text-sm font-medium">Preheader</Label>
+            <Label htmlFor="preheader">Preheader</Label>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={() => handleRegenerateSection('preheader')}
-              className="h-6 text-xs hover:bg-primary/10 hover:text-primary"
+              className="h-6 text-xs"
               disabled={isRegenerating}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
@@ -239,21 +221,20 @@ export const EmailGenerator = ({
             id="preheader"
             value={emailCopy.preheader}
             onChange={(e) => handleChange('preheader', e.target.value)}
-            className="border-primary/20 focus-visible:ring-primary/30"
           />
-          <p className="text-xs text-muted-foreground italic">
+          <p className="text-xs text-muted-foreground">
             The preheader is the short summary text that follows the subject line when an email is viewed in the inbox.
           </p>
         </div>
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="body" className="text-sm font-medium">Email Body</Label>
+            <Label htmlFor="body">Email Body</Label>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={() => handleRegenerateSection('body')}
-              className="h-6 text-xs hover:bg-primary/10 hover:text-primary"
+              className="h-6 text-xs"
               disabled={isRegenerating}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
@@ -269,12 +250,12 @@ export const EmailGenerator = ({
             id="body"
             value={emailCopy.body}
             onChange={(e) => handleChange('body', e.target.value)}
-            className="min-h-[200px] border-primary/20 focus-visible:ring-primary/30"
+            className="min-h-[200px]"
           />
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between bg-muted/30 border-t border-border/50 px-6 py-4">
-        <Button variant="outline" onClick={handleCopyToClipboard} disabled={isRegenerating} className="border-primary/20 hover:bg-primary/5 hover:text-primary">
+      <CardFooter className="flex justify-between">
+        <Button variant="outline" onClick={handleCopyToClipboard} disabled={isRegenerating}>
           {isCopied ? (
             <>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
@@ -292,7 +273,7 @@ export const EmailGenerator = ({
             </>
           )}
         </Button>
-        <Button onClick={handleSave} disabled={isRegenerating} className="bg-primary hover:bg-primary/90">
+        <Button onClick={handleSave} disabled={isRegenerating}>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
             <polyline points="17 21 17 13 7 13 7 21" />

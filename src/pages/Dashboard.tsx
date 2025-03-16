@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,34 +8,146 @@ import { UrlInput } from "@/components/UrlInput";
 import { EmailGenerator } from "@/components/EmailGenerator";
 import { EmailPreview } from "@/components/EmailPreview";
 import { SavedTemplates } from "@/components/SavedTemplates";
-import { generateEmailCopy } from "@/lib/mockData";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
+import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/use-profile";
+import { supabase } from "@/integrations/supabase/client";
+import { analyzeLandingPage, saveEmailTemplate, logAnalyticsEvent } from "@/services/landingPageService";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+// Define types for our email copy
+interface EmailCopy {
+  subject: string;
+  preheader: string;
+  body: string;
+}
+
+// Define types for our landing page data
+interface LandingPageData {
+  id: string;
+  url: string;
+  title: string;
+  description: string;
+  keywords: string[];
+  analyzed_data: any;
+}
 
 const Dashboard = () => {
+  const { user, signOut } = useAuth();
+  const { profile } = useProfile();
   const [url, setUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [emailCopy, setEmailCopy] = useState<{
-    subject: string;
-    body: string;
-    preheader: string;
-  } | null>(null);
+  const [emailCopy, setEmailCopy] = useState<EmailCopy | null>(null);
   const [activeTab, setActiveTab] = useState("generate");
 
   const handleUrlSubmit = async (submittedUrl: string) => {
+    if (!user) return;
+    
     setUrl(submittedUrl);
     setIsAnalyzing(true);
     
-    // Simulate API call to analyze URL and generate email copy
-    setTimeout(() => {
-      const generatedCopy = generateEmailCopy(submittedUrl);
+    try {
+      // Use our service to analyze the landing page
+      const landingPageData = await analyzeLandingPage(submittedUrl);
+      
+      // Generate email copy based on the landing page data
+      const generatedCopy = generateEmailCopy(landingPageData);
       setEmailCopy(generatedCopy);
+      
+      // Log analytics event
+      await logAnalyticsEvent('generated_email', { url: submittedUrl });
+    } catch (error) {
+      console.error("Error analyzing URL:", error);
+      toast({
+        title: "Error",
+        description: "Failed to analyze the landing page. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsAnalyzing(false);
-    }, 2000);
+    }
   };
 
-  const handleSaveTemplate = () => {
-    // In a real app, this would save to a database
-    console.log("Saving template:", emailCopy);
-    // Show success message or update UI
+  const handleSaveTemplate = async () => {
+    if (!user || !emailCopy) return;
+    
+    try {
+      await saveEmailTemplate({
+        name: `Template from ${url}`,
+        subject: emailCopy.subject,
+        preheader: emailCopy.preheader,
+        body: emailCopy.body
+      });
+      
+      // Log analytics event
+      await logAnalyticsEvent('template_saved', { url });
+      
+      toast({
+        title: "Template saved",
+        description: "Your email template has been saved successfully.",
+      });
+    } catch (error) {
+      console.error("Error saving template:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save the template. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Function to generate email copy based on landing page data
+  const generateEmailCopy = (landingPageData: LandingPageData): EmailCopy => {
+    const analyzedData = landingPageData.analyzed_data;
+    
+    // In a real app, this would use AI to generate copy based on the landing page data
+    // For now, we'll use a simple template
+    
+    return {
+      subject: `Discover: ${analyzedData.main_heading}`,
+      preheader: analyzedData.sub_heading || analyzedData.description,
+      body: `Hi there,
+
+We noticed you're interested in ${analyzedData.industry} solutions, and we wanted to share how our product can help you ${analyzedData.sub_heading.toLowerCase()}.
+
+${analyzedData.main_heading} is now possible with our innovative solution. Here's what you can expect:
+
+${analyzedData.key_points.map((point: string) => `• ${point}`).join('\n')}
+
+Ready to transform your business? Click below to get started.
+
+[${analyzedData.cta_text}]
+
+If you have any questions, feel free to reply to this email.
+
+Best regards,
+The Team`
+    };
   };
 
   return (
@@ -77,9 +189,50 @@ const Dashboard = () => {
               </svg>
               Help
             </Button>
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium">
-              U
-            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
+                  <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium">
+                    {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                      <rect width="18" height="18" x="3" y="3" rx="2" />
+                      <path d="M9 3v18" />
+                      <path d="M13 7h5" />
+                      <path d="M13 11h5" />
+                      <path d="M13 15h5" />
+                    </svg>
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -88,7 +241,9 @@ const Dashboard = () => {
         <div className="flex flex-col gap-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground">Generate and manage your email marketing copy.</p>
+            <p className="text-muted-foreground">
+              Welcome back, {profile?.full_name || user?.email?.split('@')[0] || 'User'}! Generate and manage your email marketing copy.
+            </p>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -138,27 +293,7 @@ const Dashboard = () => {
             </TabsContent>
             
             <TabsContent value="analytics">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analytics</CardTitle>
-                  <CardDescription>
-                    Track the performance of your email campaigns.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="h-[400px] flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-muted-foreground">
-                      <path d="M3 3v18h18" />
-                      <path d="M18 9l-6-6-7 7" />
-                      <path d="M14 10l2-2" />
-                    </svg>
-                    <h3 className="text-lg font-medium">Analytics Coming Soon</h3>
-                    <p className="text-muted-foreground max-w-md">
-                      We're working on adding analytics to help you track the performance of your email campaigns.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <AnalyticsDashboard />
             </TabsContent>
           </Tabs>
         </div>

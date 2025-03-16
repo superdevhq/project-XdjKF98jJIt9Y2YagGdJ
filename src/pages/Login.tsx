@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,14 +11,21 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn, signUp, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Get tab and plan from URL parameters
+  const searchParams = new URLSearchParams(location.search);
+  const tabParam = searchParams.get('tab');
+  const planParam = searchParams.get('plan');
   
   // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [activeTab, setActiveTab] = useState(tabParam === 'signup' ? 'signup' : 'login');
 
   // If user is already logged in, redirect to dashboard
   useEffect(() => {
@@ -26,6 +33,21 @@ const Login = () => {
       navigate("/dashboard");
     }
   }, [user, navigate]);
+
+  // Set plan information if provided
+  useEffect(() => {
+    if (planParam) {
+      // You could store this in state or context to use after signup
+      console.log(`Selected plan: ${planParam}`);
+      // Could show a message about the selected plan
+      if (planParam === 'professional' || planParam === 'enterprise') {
+        toast({
+          title: `${planParam.charAt(0).toUpperCase() + planParam.slice(1)} Plan Selected`,
+          description: "You'll be able to upgrade after creating your account.",
+        });
+      }
+    }
+  }, [planParam]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +148,7 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>

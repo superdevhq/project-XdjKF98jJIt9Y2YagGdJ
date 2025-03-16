@@ -29,7 +29,7 @@ const Index = () => {
             <Link to="/login">
               <Button variant="ghost">Login</Button>
             </Link>
-            <Link to="/login">
+            <Link to="/login?tab=signup">
               <Button>Get Started</Button>
             </Link>
           </div>
@@ -47,10 +47,12 @@ const Index = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 animate-in slide-in-from-bottom" style={{ animationDelay: "0.2s" }}>
-          <Link to="/dashboard">
+          <Link to="/login">
             <Button size="lg" className="px-8">Try for Free</Button>
           </Link>
-          <Button size="lg" variant="outline">See How It Works</Button>
+          <a href="#how-it-works">
+            <Button size="lg" variant="outline">See How It Works</Button>
+          </a>
         </div>
 
         {/* Rating badge with avatars */}
@@ -96,7 +98,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="container py-24 space-y-16">
+      <section id="how-it-works" className="container py-24 space-y-16">
         <div className="text-center space-y-4">
           <h2 className="text-3xl md:text-4xl font-bold">How EmailCraft Works</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -199,7 +201,7 @@ const Index = () => {
       </section>
 
       {/* Pricing Section */}
-      <section className="container py-24 space-y-12">
+      <section id="pricing" className="container py-24 space-y-12">
         <div className="text-center space-y-4">
           <h2 className="text-3xl md:text-4xl font-bold">Simple, Transparent Pricing</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -220,7 +222,8 @@ const Index = () => {
                 "Landing page analysis"
               ],
               cta: "Start for Free",
-              popular: false
+              popular: false,
+              link: "/login"
             },
             {
               name: "Professional",
@@ -235,7 +238,8 @@ const Index = () => {
                 "Custom branding"
               ],
               cta: "Get Started",
-              popular: true
+              popular: true,
+              link: "/login?plan=professional"
             },
             {
               name: "Enterprise",
@@ -251,7 +255,8 @@ const Index = () => {
                 "API access"
               ],
               cta: "Contact Sales",
-              popular: false
+              popular: false,
+              link: "/login?plan=enterprise"
             }
           ].map((plan, index) => (
             <div 
@@ -283,13 +288,15 @@ const Index = () => {
                   ))}
                 </ul>
               </div>
-              <Button 
-                className={`mt-8 ${plan.popular ? '' : 'bg-background text-foreground border hover:bg-accent'}`}
-                variant={plan.popular ? 'default' : 'outline'}
-                size="lg"
-              >
-                {plan.cta}
-              </Button>
+              <Link to={plan.link}>
+                <Button 
+                  className={`mt-8 w-full ${plan.popular ? '' : 'bg-background text-foreground border hover:bg-accent'}`}
+                  variant={plan.popular ? 'default' : 'outline'}
+                  size="lg"
+                >
+                  {plan.cta}
+                </Button>
+              </Link>
             </div>
           ))}
         </div>
@@ -345,7 +352,7 @@ const Index = () => {
                 Join thousands of marketers who are saving time and increasing conversions with EmailCraft.
               </p>
             </div>
-            <Link to="/login">
+            <Link to="/login?tab=signup">
               <Button size="lg" variant="secondary" className="px-8 whitespace-nowrap hover:bg-white/90 hover:text-indigo-700 transition-colors">
                 Get Started Free
               </Button>

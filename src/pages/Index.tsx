@@ -57,10 +57,10 @@ const Index = () => {
         <div className="flex items-center gap-3 bg-accent/50 px-5 py-3 rounded-full animate-in fade-in" style={{ animationDelay: "0.3s" }}>
           <div className="flex -space-x-2">
             {[
-              "https://this-person-does-not-exist.com/img/avatar-gen11a973a9de56e0113dbe0018e76a8f1c.jpg", 
-              "https://this-person-does-not-exist.com/img/avatar-gen115b6c2d9e47a7ea9f3f9d20eafc05c6.jpg", 
-              "https://this-person-does-not-exist.com/img/avatar-gen1142c2c3e9fa3de63778f0b3a3a3bb52.jpg", 
-              "https://this-person-does-not-exist.com/img/avatar-gen11f3432d5ca64d2fae5a8c9d3c3ea8d5.jpg"
+              "https://randomuser.me/api/portraits/women/44.jpg", 
+              "https://randomuser.me/api/portraits/men/32.jpg", 
+              "https://randomuser.me/api/portraits/women/68.jpg", 
+              "https://randomuser.me/api/portraits/men/75.jpg"
             ].map((avatar, index) => (
               <div 
                 key={index} 
@@ -68,7 +68,7 @@ const Index = () => {
               >
                 <img 
                   src={avatar} 
-                  alt={`User avatar ${index + 1}`} 
+                  alt={`User avatar ${index + 1}`}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -248,33 +248,31 @@ const Index = () => {
               <div className="space-y-4">
                 <h3 className="font-semibold">Product</h3>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">Features</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">Pricing</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">Testimonials</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">FAQ</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Features</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Pricing</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Integrations</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Changelog</a></li>
+                </ul>
+              </div>
+              <div className="space-y-4">
+                <h3 className="font-semibold">Resources</h3>
+                <ul className="space-y-2">
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Blog</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Help Center</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Community</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">API Documentation</a></li>
                 </ul>
               </div>
               <div className="space-y-4">
                 <h3 className="font-semibold">Company</h3>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">About</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">Blog</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">Careers</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">Contact</a></li>
-                </ul>
-              </div>
-              <div className="space-y-4">
-                <h3 className="font-semibold">Legal</h3>
-                <ul className="space-y-2">
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">Privacy Policy</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">Terms of Service</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground">Cookie Policy</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">About Us</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Careers</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Privacy Policy</a></li>
+                  <li><a href="#" className="text-muted-foreground hover:text-primary">Terms of Service</a></li>
                 </ul>
               </div>
             </div>
-          </div>
-          <div className="mt-12 pt-8 border-t text-center text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} EmailCraft. All rights reserved.</p>
           </div>
         </div>
       </footer>

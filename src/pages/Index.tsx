@@ -53,24 +53,45 @@ const Index = () => {
           <Button size="lg" variant="outline">See How It Works</Button>
         </div>
 
-        {/* Rating badge - new addition */}
-        <div className="flex items-center gap-2 bg-accent/50 px-4 py-2 rounded-full animate-in fade-in" style={{ animationDelay: "0.3s" }}>
-          <div className="flex">
-            {[1, 2, 3, 4, 5].map((star, index) => (
-              <svg
-                key={index}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill={index < 4.5 ? "currentColor" : "none"}
-                stroke="currentColor"
-                className={`w-4 h-4 ${index < 4.5 ? "text-yellow-500" : "text-gray-300"}`}
+        {/* Rating badge with avatars */}
+        <div className="flex items-center gap-3 bg-accent/50 px-5 py-3 rounded-full animate-in fade-in" style={{ animationDelay: "0.3s" }}>
+          <div className="flex -space-x-2">
+            {[
+              "https://this-person-does-not-exist.com/img/avatar-gen11a973a9de56e0113dbe0018e76a8f1c.jpg", 
+              "https://this-person-does-not-exist.com/img/avatar-gen115b6c2d9e47a7ea9f3f9d20eafc05c6.jpg", 
+              "https://this-person-does-not-exist.com/img/avatar-gen1142c2c3e9fa3de63778f0b3a3a3bb52.jpg", 
+              "https://this-person-does-not-exist.com/img/avatar-gen11f3432d5ca64d2fae5a8c9d3c3ea8d5.jpg"
+            ].map((avatar, index) => (
+              <div 
+                key={index} 
+                className="h-7 w-7 rounded-full border-2 border-background bg-muted overflow-hidden"
               >
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
+                <img 
+                  src={avatar} 
+                  alt={`User avatar ${index + 1}`} 
+                  className="h-full w-full object-cover"
+                />
+              </div>
             ))}
           </div>
-          <span className="font-medium">4.8/5</span>
-          <span className="text-muted-foreground text-sm">from 2,000+ reviews</span>
+          <div className="flex items-center gap-1.5">
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((star, index) => (
+                <svg 
+                  key={index}
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill={index < 4.5 ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  className={`w-4 h-4 ${index < 4.5 ? "text-yellow-500" : "text-gray-300"}`}
+                >
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              ))}
+            </div>
+            <span className="font-medium">4.8/5</span>
+            <span className="text-muted-foreground text-sm">from 2,000+ reviews</span>
+          </div>
         </div>
       </section>
 
@@ -111,7 +132,7 @@ const Index = () => {
               description: "Edit the generated copy to your liking and export it for your campaigns.",
               icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-10 w-10 text-primary">
-                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1" />
                   <polyline points="14 2 14 8 20 8" />
                   <path d="M8 13h8" />
                   <path d="M8 17h8" />

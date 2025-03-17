@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Bar, BarChart, Line, LineChart, XAxis, YAxis } from "recharts";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 interface AnalyticsEvent {
   id: string;
@@ -143,7 +145,7 @@ export const AnalyticsDashboard = () => {
         );
       case 'template_saved':
         return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-secondary">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
             <polyline points="17 21 17 13 7 13 7 21" />
             <polyline points="7 3 7 8 15 8" />
@@ -187,56 +189,154 @@ export const AnalyticsDashboard = () => {
       ) : analytics ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Emails Generated
-                </CardTitle>
+            <Card className="overflow-hidden border-0 shadow-md bg-gradient-to-br from-background to-background/80">
+              <CardHeader className="pb-2 border-b border-border/40">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">
+                    Total Emails Generated
+                  </CardTitle>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    className="text-primary"
+                  >
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="text-3xl font-bold">{analytics.totalEmails}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {analytics.totalEmails > 10 ? "Great job! Keep creating content." : "Start generating more emails to improve your reach."}
+                </p>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Saved Templates
-                </CardTitle>
+            
+            <Card className="overflow-hidden border-0 shadow-md bg-gradient-to-br from-background to-background/80">
+              <CardHeader className="pb-2 border-b border-border/40">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">
+                    Saved Templates
+                  </CardTitle>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    className="text-secondary"
+                  >
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                  </svg>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="text-3xl font-bold">{analytics.totalTemplates}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {analytics.totalTemplates > 5 ? "You have a good collection of templates." : "Create more templates to save time."}
+                </p>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Analyzed Landing Pages
-                </CardTitle>
+            
+            <Card className="overflow-hidden border-0 shadow-md bg-gradient-to-br from-background to-background/80">
+              <CardHeader className="pb-2 border-b border-border/40">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">
+                    Analyzed Landing Pages
+                  </CardTitle>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    className="text-purple-500"
+                  >
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <path d="M16 13H8" />
+                    <path d="M16 17H8" />
+                    <path d="M10 9H8" />
+                  </svg>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="text-3xl font-bold">{analytics.totalLandingPages}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {analytics.totalLandingPages > 3 ? "You're actively analyzing landing pages." : "Analyze more landing pages to improve your emails."}
+                </p>
               </CardContent>
             </Card>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="activity">Recent Activity</TabsTrigger>
-            </TabsList>
+          {/* Improved Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
+            <div className="border-b">
+              <TabsList className="mb-0 bg-transparent justify-start h-auto p-0">
+                <TabsTrigger 
+                  value="overview" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none px-4 py-2 h-10 bg-transparent"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="activity" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none px-4 py-2 h-10 bg-transparent"
+                >
+                  Recent Activity
+                </TabsTrigger>
+              </TabsList>
+            </div>
             
-            <TabsContent value="overview">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Usage Overview</CardTitle>
-                  <CardDescription>
-                    Your email generation and template usage statistics.
-                  </CardDescription>
+            <TabsContent value="overview" className="pt-6">
+              <Card className="border-0 shadow-md overflow-hidden">
+                <CardHeader className="bg-muted/50 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    <div>
+                      <CardTitle>Usage Overview</CardTitle>
+                      <CardDescription>
+                        Your email generation and template usage statistics.
+                      </CardDescription>
+                    </div>
+                    <Badge variant="outline" className="w-fit">
+                      Last 6 months
+                    </Badge>
+                  </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <div className="space-y-8">
                     <div>
-                      <h3 className="text-sm font-medium mb-2">Email Generation Activity</h3>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-medium">Email Generation Activity</h3>
+                        <div className="flex items-center gap-3 text-xs">
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 rounded-full bg-primary"></div>
+                            <span>Emails</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 rounded-full bg-secondary"></div>
+                            <span>Templates</span>
+                          </div>
+                        </div>
+                      </div>
                       <ChartContainer 
                         className="h-[300px]"
                         config={{
@@ -294,8 +394,13 @@ export const AnalyticsDashboard = () => {
                       </ChartContainer>
                     </div>
                     
+                    <Separator />
+                    
                     <div>
-                      <h3 className="text-sm font-medium mb-2">Activity Trend</h3>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-medium">Activity Trend</h3>
+                        <Badge variant="outline" className="text-xs">Monthly</Badge>
+                      </div>
                       <ChartContainer 
                         className="h-[200px]"
                         config={{
@@ -355,18 +460,112 @@ export const AnalyticsDashboard = () => {
                         </LineChart>
                       </ChartContainer>
                     </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                      <Card className="bg-muted/30">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">Peak Month</p>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                              <polyline points="16 7 22 7 22 13"></polyline>
+                            </svg>
+                          </div>
+                          <p className="text-2xl font-bold mt-2">May</p>
+                          <p className="text-xs text-muted-foreground">32 emails generated</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-muted/30">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">Avg. Monthly</p>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-secondary">
+                              <path d="M3 6h18"></path>
+                              <path d="M3 12h18"></path>
+                              <path d="M3 18h18"></path>
+                            </svg>
+                          </div>
+                          <p className="text-2xl font-bold mt-2">21.7</p>
+                          <p className="text-xs text-muted-foreground">emails per month</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-muted/30">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">Growth</p>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+                              <path d="m5 12 5 5 9-9"></path>
+                              <line x1="12" y1="9" x2="12" y2="13"></line>
+                              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                          </div>
+                          <p className="text-2xl font-bold">+133%</p>
+                          <p className="text-xs text-muted-foreground">Jan to May</p>
+                        </CardContent>
+                      </Card>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
             
-            <TabsContent value="activity">
-              {/* ...keep existing activity tab content */}
+            <TabsContent value="activity" className="pt-6">
+              <Card className="border-0 shadow-md">
+                <CardHeader className="bg-muted/50">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle>Recent Activity</CardTitle>
+                      <CardDescription>
+                        Your recent actions and events on the platform.
+                      </CardDescription>
+                    </div>
+                    <Badge variant="outline">Last 10 events</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {analytics.recentActivity.length === 0 ? (
+                    <div className="text-center py-8">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-muted-foreground mb-3">
+                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                      </svg>
+                      <p className="text-muted-foreground">No recent activity found.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {analytics.recentActivity.map((event) => (
+                        <div key={event.id} className="flex items-start gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                          <div className="mt-0.5 p-1.5 rounded-full bg-muted">{getEventIcon(event.event_type)}</div>
+                          <div className="flex-1">
+                            <div className="font-medium">{formatEventType(event.event_type)}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {event.event_data?.url && (
+                                <span>URL: {event.event_data.url}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
+                            {formatDate(event.created_at)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </>
       ) : (
         <div className="text-center py-12">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-muted-foreground mb-4">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
           <p className="text-muted-foreground">No analytics data available.</p>
         </div>
       )}

@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { GenerateEmailDialog } from "@/components/GenerateEmailDialog";
 
 const Index = () => {
   return (
@@ -47,9 +49,7 @@ const Index = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 animate-in slide-in-from-bottom" style={{ animationDelay: "0.2s" }}>
-          <Link to="/login">
-            <Button size="lg" className="px-8">Try for Free</Button>
-          </Link>
+          <GenerateEmailDialog buttonText="Try for Free" buttonSize="lg" buttonClassName="px-8" />
           <a href="#how-it-works">
             <Button size="lg" variant="outline">See How It Works</Button>
           </a>
@@ -149,6 +149,9 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
+              {index === 0 && (
+                <GenerateEmailDialog buttonText="Try It" buttonVariant="ghost" buttonClassName="mt-4 text-primary hover:text-primary" />
+              )}
             </div>
           ))}
         </div>
@@ -309,13 +312,15 @@ const Index = () => {
             </div>
 
             <Link to="/login">
-              <Button size="lg" className="mt-4">
-                Try It Yourself
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 h-4 w-4">
-                  <path d="M5 12h14"></path>
-                  <path d="m12 5 7 7-7 7"></path>
-                </svg>
-              </Button>
+              <GenerateEmailDialog buttonSize="lg" buttonVariant="secondary" buttonClassName="mt-4">
+                <Button size="lg" variant="secondary" className="px-8 whitespace-nowrap hover:bg-white/90 hover:text-indigo-700 transition-colors">
+                  Try It Yourself
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 h-4 w-4">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </Button>
+              </GenerateEmailDialog>
             </Link>
           </div>
         </div>
@@ -473,11 +478,11 @@ const Index = () => {
                 Join thousands of marketers who are saving time and increasing conversions with EmailCraft.
               </p>
             </div>
-            <Link to="/login?tab=signup">
+            <GenerateEmailDialog buttonSize="lg" buttonVariant="secondary" buttonClassName="px-8 whitespace-nowrap hover:bg-white/90 hover:text-indigo-700 transition-colors">
               <Button size="lg" variant="secondary" className="px-8 whitespace-nowrap hover:bg-white/90 hover:text-indigo-700 transition-colors">
                 Get Started Free
               </Button>
-            </Link>
+            </GenerateEmailDialog>
           </div>
         </div>
       </section>

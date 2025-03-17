@@ -1,5 +1,7 @@
 
-// ... keep existing imports
+// ... keep existing imports the same
+
+// Add chart-related imports
 import { 
   ChartContainer, 
   ChartTooltip, 
@@ -12,22 +14,25 @@ import {
   BarChart,
   Line,
   LineChart,
+  ResponsiveContainer,
   XAxis,
   YAxis
 } from "recharts";
 
-// ... keep existing AnalyticsEvent interface
+interface AnalyticsEvent {
+  // ... keep existing interface the same
+}
 
 interface AnalyticsSummary {
-  // ... keep existing interface properties
+  // ... keep existing interface properties the same
   
   // Add new properties for chart data
-  emailsOverTime?: { date: string; count: number }[];
-  templatesOverTime?: { date: string; count: number }[];
+  emailsOverTime: { date: string; count: number }[];
+  templatesOverTime: { date: string; count: number }[];
 }
 
 export const AnalyticsDashboard = () => {
-  // ... keep existing state variables
+  // ... keep existing state variables the same
   
   // Add mock chart data for demonstration
   const [chartData, setChartData] = useState([
@@ -45,8 +50,11 @@ export const AnalyticsDashboard = () => {
       
       try {
         setIsLoading(true);
-
-        // ... keep existing API calls
+        
+        // ... keep existing API calls the same
+        
+        // In a real implementation, we would fetch time-series data for charts
+        // For now, we'll use mock data
         
         setAnalytics({
           totalEmails: emailsCount || 0,
@@ -85,16 +93,16 @@ export const AnalyticsDashboard = () => {
     return data;
   };
 
-  // ... keep existing helper functions
+  // ... keep existing helper functions the same
 
   return (
     <div className="space-y-6">
       {isLoading ? (
-        // ... keep existing loading state
+        // ... keep existing loading state the same
       ) : analytics ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* ... keep existing stat cards */}
+            {/* ... keep existing stat cards the same */}
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -241,12 +249,12 @@ export const AnalyticsDashboard = () => {
             </TabsContent>
             
             <TabsContent value="activity">
-              {/* ... keep existing activity tab content */}
+              {/* ... keep existing activity tab content the same */}
             </TabsContent>
           </Tabs>
         </>
       ) : (
-        // ... keep existing empty state
+        // ... keep existing empty state the same
       )}
     </div>
   );

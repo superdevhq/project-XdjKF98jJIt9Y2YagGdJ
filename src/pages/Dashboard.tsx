@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -297,7 +296,7 @@ const Dashboard = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList>
               <TabsTrigger value="generate">Generate Copy</TabsTrigger>
-              <TabsTrigger value="templates">Saved Templates</TabsTrigger>
+              <TabsTrigger value="templates">Your Templates</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
             

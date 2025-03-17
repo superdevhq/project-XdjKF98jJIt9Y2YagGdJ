@@ -14,6 +14,7 @@ import {
   BarChart,
   Line,
   LineChart,
+  ResponsiveContainer,
   XAxis,
   YAxis
 } from "recharts";
@@ -26,8 +27,8 @@ interface AnalyticsSummary {
   // ... keep existing interface properties the same
   
   // Add new properties for chart data
-  emailsOverTime?: { date: string; count: number }[];
-  templatesOverTime?: { date: string; count: number }[];
+  emailsOverTime: { date: string; count: number }[];
+  templatesOverTime: { date: string; count: number }[];
 }
 
 export const AnalyticsDashboard = () => {

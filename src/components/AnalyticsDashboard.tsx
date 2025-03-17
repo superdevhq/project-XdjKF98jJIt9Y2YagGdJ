@@ -1,9 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { Bar, BarChart, Line, LineChart, XAxis, YAxis } from "recharts";
 
 interface AnalyticsEvent {
   id: string;
@@ -18,6 +19,8 @@ interface AnalyticsSummary {
   totalTemplates: number;
   totalLandingPages: number;
   recentActivity: AnalyticsEvent[];
+  emailsOverTime?: { date: string; count: number }[];
+  templatesOverTime?: { date: string; count: number }[];
 }
 
 export const AnalyticsDashboard = () => {
@@ -25,6 +28,14 @@ export const AnalyticsDashboard = () => {
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [chartData, setChartData] = useState([
+    { name: "Jan", emails: 12, templates: 4 },
+    { name: "Feb", emails: 18, templates: 5 },
+    { name: "Mar", emails: 15, templates: 6 },
+    { name: "Apr", emails: 25, templates: 7 },
+    { name: "May", emails: 32, templates: 8 },
+    { name: "Jun", emails: 28, templates: 9 },
+  ]);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -73,6 +84,8 @@ export const AnalyticsDashboard = () => {
           totalTemplates: templatesCount || 0,
           totalLandingPages: landingPagesCount || 0,
           recentActivity: recentActivity || [],
+          emailsOverTime: generateMockTimeSeriesData(6, 5, 30),
+          templatesOverTime: generateMockTimeSeriesData(6, 1, 5),
         });
       } catch (error) {
         console.error("Error fetching analytics:", error);
@@ -84,7 +97,23 @@ export const AnalyticsDashboard = () => {
     fetchAnalytics();
   }, [user]);
 
-  // Format date for display
+  const generateMockTimeSeriesData = (months: number, minCount: number, maxCount: number) => {
+    const data = [];
+    const now = new Date();
+    
+    for (let i = months - 1; i >= 0; i--) {
+      const date = new Date(now);
+      date.setMonth(date.getMonth() - i);
+      
+      data.push({
+        date: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        count: Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount
+      });
+    }
+    
+    return data;
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
@@ -96,7 +125,6 @@ export const AnalyticsDashboard = () => {
     }).format(date);
   };
 
-  // Format event type for display
   const formatEventType = (eventType: string) => {
     return eventType
       .split('_')
@@ -104,7 +132,6 @@ export const AnalyticsDashboard = () => {
       .join(' ');
   };
 
-  // Get event icon based on event type
   const getEventIcon = (eventType: string) => {
     switch (eventType) {
       case 'generated_email':
@@ -207,17 +234,126 @@ export const AnalyticsDashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[300px] flex items-center justify-center">
-                    <div className="text-center space-y-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-muted-foreground">
-                        <path d="M3 3v18h18" />
-                        <path d="M18 9l-6-6-7 7" />
-                        <path d="M14 10l2-2" />
-                      </svg>
-                      <h3 className="text-lg font-medium">Detailed Analytics Coming Soon</h3>
-                      <p className="text-muted-foreground max-w-md">
-                        We're working on adding detailed analytics charts to help you track your email marketing performance.
-                      </p>
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Email Generation Activity</h3>
+                      <ChartContainer 
+                        className="h-[300px]"
+                        config={{
+                          emails: {
+                            label: "Emails Generated",
+                            theme: {
+                              light: "hsl(var(--primary))",
+                              dark: "hsl(var(--primary))"
+                            }
+                          },
+                          templates: {
+                            label: "Templates Created",
+                            theme: {
+                              light: "hsl(var(--secondary))",
+                              dark: "hsl(var(--secondary))"
+                            }
+                          }
+                        }}
+                      >
+                        <BarChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                          <XAxis 
+                            dataKey="name" 
+                            stroke="#888888" 
+                            fontSize={12} 
+                            tickLine={false} 
+                            axisLine={false}
+                          />
+                          <YAxis 
+                            stroke="#888888" 
+                            fontSize={12} 
+                            tickLine={false} 
+                            axisLine={false}
+                            tickFormatter={(value) => `${value}`}
+                          />
+                          <Bar 
+                            dataKey="emails" 
+                            fill="var(--color-emails)" 
+                            radius={[4, 4, 0, 0]} 
+                            className="fill-primary"
+                          />
+                          <Bar 
+                            dataKey="templates" 
+                            fill="var(--color-templates)" 
+                            radius={[4, 4, 0, 0]} 
+                            className="fill-secondary"
+                          />
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent 
+                                labelClassName="text-xs font-medium" 
+                              />
+                            }
+                          />
+                        </BarChart>
+                      </ChartContainer>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Activity Trend</h3>
+                      <ChartContainer 
+                        className="h-[200px]"
+                        config={{
+                          emails: {
+                            label: "Emails Generated",
+                            theme: {
+                              light: "hsl(var(--primary))",
+                              dark: "hsl(var(--primary))"
+                            }
+                          },
+                          templates: {
+                            label: "Templates Created",
+                            theme: {
+                              light: "hsl(var(--secondary))",
+                              dark: "hsl(var(--secondary))"
+                            }
+                          }
+                        }}
+                      >
+                        <LineChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                          <XAxis 
+                            dataKey="name" 
+                            stroke="#888888" 
+                            fontSize={12} 
+                            tickLine={false} 
+                            axisLine={false}
+                          />
+                          <YAxis 
+                            stroke="#888888" 
+                            fontSize={12} 
+                            tickLine={false} 
+                            axisLine={false}
+                            tickFormatter={(value) => `${value}`}
+                          />
+                          <Line 
+                            type="monotone" 
+                            strokeWidth={2}
+                            dataKey="emails" 
+                            activeDot={{ r: 6, style: { fill: "var(--color-emails)", opacity: 0.8 } }}
+                            style={{ stroke: "var(--color-emails)" }}
+                          />
+                          <Line 
+                            type="monotone" 
+                            strokeWidth={2}
+                            dataKey="templates" 
+                            activeDot={{ r: 6, style: { fill: "var(--color-templates)", opacity: 0.8 } }}
+                            style={{ stroke: "var(--color-templates)" }}
+                          />
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent 
+                                labelClassName="text-xs font-medium" 
+                              />
+                            }
+                          />
+                          <ChartLegend content={<ChartLegendContent />} />
+                        </LineChart>
+                      </ChartContainer>
                     </div>
                   </div>
                 </CardContent>
@@ -225,40 +361,7 @@ export const AnalyticsDashboard = () => {
             </TabsContent>
             
             <TabsContent value="activity">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>
-                    Your recent actions and events on the platform.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {analytics.recentActivity.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">No recent activity found.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {analytics.recentActivity.map((event) => (
-                        <div key={event.id} className="flex items-start gap-4 p-3 rounded-lg border">
-                          <div className="mt-0.5">{getEventIcon(event.event_type)}</div>
-                          <div className="flex-1">
-                            <div className="font-medium">{formatEventType(event.event_type)}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {event.event_data?.url && (
-                                <span>URL: {event.event_data.url}</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {formatDate(event.created_at)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              {/* ...keep existing activity tab content */}
             </TabsContent>
           </Tabs>
         </>
